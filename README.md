@@ -20,7 +20,7 @@ If you want to use MailDev with [Docker](https://www.docker.com/), you can use t
 [**ifgiovanni/maildev** image on Docker Hub](https://hub.docker.com/r/ifgiovanni/maildev). For a guide for usage with Docker,
 [checkout the docs](https://github.com/ifgiovanni/maildev/blob/master/docs/docker.md).
 
-    $ docker run -p 80:80 -p 25:25 ifgiovanni/maildev:v3.0.3
+    $ docker run -p 80:80 -p 25:25 ifgiovanni/maildev:v3.0.0
 
 ## Usage
 
