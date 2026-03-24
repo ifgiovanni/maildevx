@@ -157,29 +157,6 @@ const messages = [
     html: formHtml
   },
 
-  //
-  /*
-  {
-    from: 'Bodhi <bodhi@gmail.com>',
-    to: 'Johnny Utah <johnny.utah@fbi.gov>',
-    subject: 'UTF-8 demo',
-    text: utf8demo,
-    html: utf8demo
-  },
-  {
-    from: 'Johnny Utah <johnny.utah@fbi.gov>',
-    to: 'Bodhi <bodhi@gmail.com>',
-    subject: 'CVE-2024-27448',
-    html: 'Content-ID should not allow file injection: <img src="cid:../vuln"/>',
-    attachments: [
-      {
-        filename: 'tyler.jpg',
-        path: path.join(__dirname, '/../test/tyler.jpg'),
-        cid: '../vuln'
-      }
-    ]
-  },
-
 ]
 
 function sendEmails (logErrors) {

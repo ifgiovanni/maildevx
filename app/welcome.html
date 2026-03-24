@@ -1,53 +1,339 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MailDev - Filtro Inicial</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <title>InboxLab - Login</title>
+  <style>
+    :root {
+      --bg: #f2f3f6;
+      --panel: #ffffff;
+      --line: #e7e9ee;
+      --text: #1a1c24;
+      --muted: #7a7f8b;
+      --primary: #10121a;
+      --primary-hover: #05060b;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.4rem;
+    }
+    .window {
+      width: min(1100px, 100%);
+      min-height: 640px;
+      background: #fff;
+      border-radius: 16px;
+      border: 1px solid #e3e5ea;
+      box-shadow: 0 14px 50px rgba(22, 24, 33, 0.1);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      overflow: hidden;
+    }
+    .preview {
+      background: linear-gradient(180deg, #f6f7fb 0%, #f0f2f7 100%);
+      border-right: 1px solid var(--line);
+      padding: 2.2rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .preview h2 {
+      margin: 0;
+      font-size: 1.15rem;
+      letter-spacing: -0.02em;
+    }
+    .preview p {
+      margin: 0.55rem 0 0;
+      color: var(--muted);
+      max-width: 38ch;
+      line-height: 1.55;
+      font-size: 0.9rem;
+    }
+    .floating-card {
+      position: absolute;
+      border: 1px solid #dfe2ea;
+      border-radius: 12px;
+      background: #fff;
+      box-shadow: 0 10px 30px rgba(18, 20, 28, 0.1);
+      padding: 0.9rem;
+      width: 250px;
+    }
+    .card-a {
+      top: 8.8rem;
+      left: 4rem;
+    }
+    .card-b {
+      bottom: 4rem;
+      left: 2.2rem;
+      width: 220px;
+    }
+    .mock-cover {
+      height: 108px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #f08f8f 0%, #f7c875 100%);
+      margin-bottom: 0.7rem;
+    }
+    .mock-line {
+      height: 10px;
+      border-radius: 999px;
+      background: #eceff4;
+      margin-bottom: 0.45rem;
+    }
+    .mock-line.short { width: 62%; }
+    .form-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2.1rem;
+    }
+    .form-box {
+      width: min(370px, 100%);
+    }
+    .lang-row {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.35rem;
+      margin-bottom: 0.7rem;
+    }
+    .lang-btn {
+      border: 1px solid #d7dbe3;
+      border-radius: 7px;
+      background: #f6f7fa;
+      color: #434754;
+      font-size: 11px;
+      padding: 0.24rem 0.5rem;
+      cursor: pointer;
+    }
+    .lang-btn.active {
+      background: #11131a;
+      color: #fff;
+      border-color: #11131a;
+    }
+    .form-box h1 {
+      margin: 0;
+      font-size: 2.05rem;
+      letter-spacing: -0.03em;
+      text-align: left;
+    }
+    .form-box p {
+      margin: 0.55rem 0 1.2rem;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+    .field { margin-bottom: 0.9rem; }
+    .field label {
+      display: block;
+      margin-bottom: 0.34rem;
+      font-size: 0.82rem;
+      color: #505563;
+      font-weight: 600;
+    }
+    .field input {
+      width: 100%;
+      border: 1px solid #dce0e7;
+      border-radius: 10px;
+      padding: 0.72rem 0.78rem;
+      font: inherit;
+      outline: none;
+      text-align: center;
+      font-size: 1rem;
+    }
+    .field input:focus {
+      border-color: #a5acbc;
+      box-shadow: 0 0 0 3px rgba(17, 20, 28, 0.08);
+    }
+    .actions { margin-top: 0.65rem; }
+    .primary-action {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 1rem;
+    }
+    .primary-action .btn-primary {
+      width: 150px;
+      padding: 0.68rem 0.9rem;
+      font-size: 0.9rem;
+      line-height: 1;
+    }
+    .divider {
+      border: 0;
+      border-top: 1px solid #dde1e8;
+      margin: 0.2rem 0 0.95rem;
+    }
+    button {
+      width: 100%;
+      border: 0;
+      border-radius: 10px;
+      padding: 0.76rem 0.9rem;
+      font: inherit;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-ghost {
+      border: 1px solid #d9dde5;
+      background: #f4f6f9;
+      color: #1d202a;
+    }
+    .helper {
+      margin-top: 0.8rem;
+      color: #7d828d;
+      font-size: 0.78rem;
+      line-height: 1.45;
+    }
+    @media (max-width: 900px) {
+      .window { grid-template-columns: 1fr; min-height: auto; }
+      .preview { display: none; }
+    }
+  </style>
 </head>
-<body class="flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-100 to-blue-200">
-  <div class="w-full max-w-lg p-6 bg-white rounded-lg shadow-md">
-    <h2 class="text-2xl font-semibold text-gray-800">Welcome back!</h2>
-    <h3 class="mt-2 text-lg text-gray-600">Now you can filter your emails by address.</h3>
-    <p class="mt-4 text-sm text-gray-500">
-      To filter your emails, please enter the email address you want to filter by. This will help you manage your emails more effectively.
-      If you don't want to filter, you can continue without entering anything.
-    </p>
+<body>
+  <main class="window">
+    <section class="preview">
+      <h2>InboxLab</h2>
+      <p>SMTP Server + Web Interface for viewing and testing emails during development.</p>
+      <article class="floating-card card-a">
+        <div class="mock-cover"></div>
+        <div class="mock-line"></div>
+        <div class="mock-line short"></div>
+      </article>
+      <article class="floating-card card-b">
+        <div class="mock-line"></div>
+        <div class="mock-line short"></div>
+      </article>
+    </section>
 
-    <!-- Formulario -->
-    <form action="/set-filter" method="POST" class="mt-6">
-      <div class="mb-4">
-        <label for="emailAddress" class="block text-sm font-medium text-gray-700">From</label>
-        <input
-          type="email"
-          id="emailAddress"
-          name="email"
-          placeholder="ejemplo@dominio.com"
-          class="w-full px-4 py-2 mt-1 text-sm border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 border-gray-300"
-          required
-        />
+    <section class="form-wrap">
+      <div class="form-box">
+        <div class="lang-row">
+          <button class="lang-btn active" id="langEsBtn" type="button">ES</button>
+          <button class="lang-btn" id="langEnBtn" type="button">EN</button>
+        </div>
+        <h1 id="welcomeTitle">Welcome Back</h1>
+        <p id="welcomeSubtitle">Ingresa filtros para abrir el mailbox que necesitas revisar.</p>
+        <form action="/set-filter" method="POST" id="filtersForm">
+          <div class="field">
+            <label for="fromInput" id="fromLabel">From (remitente)</label>
+            <input type="email" id="fromInput" name="from" placeholder="from">
+          </div>
+          <div class="field">
+            <label for="toInput" id="toLabel">To (destinatario)</label>
+            <input type="email" id="toInput" name="to" placeholder="to">
+          </div>
+          <div class="actions">
+            <div class="primary-action">
+              <button type="submit" class="btn-primary" id="submitBtn">-></button>
+            </div>
+            <hr class="divider">
+            <p class="helper" id="helperText">If you want to view all emails, click the button below.</p>
+            <button type="submit" formaction="/set-filter" formmethod="POST" name="mode" value="all" class="btn-ghost" id="allBtn">Ver todos los correos</button>
+          </div>
+        </form>
+       
       </div>
-      <button
-        type="submit"
-        class="w-full px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-      >
-        Continue
-      </button>
-    </form>
-    <div class="my-4 border-t border-gray-300"></div>
-    <p class="mt-4 text-sm text-gray-500">
-      If you want to continue without filtering, just click the button below.
-      This will allow you to see all emails without any filters applied.
-    <form action="/set-filter" method="POST" class="mt-2">
-      <input type="hidden" name="email" value="all" />
-      <button
-        type="submit"
-        class="w-full px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md shadow-sm hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-2"
-      >
-        Continue without filtering
-      </button>
-    </form>
-  </div>
+    </section>
+  </main>
+  <script>
+    (function () {
+      const fromInput = document.getElementById('fromInput')
+      const toInput = document.getElementById('toInput')
+      const filtersForm = document.getElementById('filtersForm')
+      const langEsBtn = document.getElementById('langEsBtn')
+      const langEnBtn = document.getElementById('langEnBtn')
+      const welcomeTitle = document.getElementById('welcomeTitle')
+      const welcomeSubtitle = document.getElementById('welcomeSubtitle')
+      const fromLabel = document.getElementById('fromLabel')
+      const toLabel = document.getElementById('toLabel')
+      const submitBtn = document.getElementById('submitBtn')
+      const allBtn = document.getElementById('allBtn')
+      const helperText = document.getElementById('helperText')
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+      const i18n = {
+        es: {
+          title: 'Bienvenido',
+          subtitle: 'Ingresa filtros para abrir el mailbox que necesitas revisar.',
+          from: 'From (remitente)',
+          to: 'To (destinatario)',
+          submit: 'Filtrar',
+          all: 'Ver todos los correos',
+          helper: 'If you want to view all emails, click the button below.',
+          atLeastOne: 'Ingresa al menos un filtro: From o To.',
+          fromInvalid: 'El correo From no es valido.',
+          toInvalid: 'El correo To no es valido.'
+        },
+        en: {
+          title: 'Welcome Back',
+          subtitle: 'Enter filters to open the mailbox you need to review.',
+          from: 'From (sender)',
+          to: 'To (recipient)',
+          submit: 'Filter',
+          all: 'View all emails',
+          helper: 'If you want to view all emails, click the button below.',
+          atLeastOne: 'Enter at least one filter: From or To.',
+          fromInvalid: 'From email is not valid.',
+          toInvalid: 'To email is not valid.'
+        }
+      }
+      const storageKey = 'maildevLanguage'
+      let language = window.localStorage.getItem(storageKey) || 'es'
+
+      function applyLanguage (lang) {
+        language = lang
+        window.localStorage.setItem(storageKey, language)
+        const tr = i18n[language]
+        welcomeTitle.textContent = tr.title
+        welcomeSubtitle.textContent = tr.subtitle
+        fromLabel.textContent = tr.from
+        toLabel.textContent = tr.to
+        submitBtn.textContent = tr.submit
+        allBtn.textContent = tr.all
+        helperText.innerHTML = tr.helper
+        langEsBtn.classList.toggle('active', language === 'es')
+        langEnBtn.classList.toggle('active', language === 'en')
+      }
+
+      function getFilters () {
+        return {
+          from: (fromInput.value || '').trim(),
+          to: (toInput.value || '').trim()
+        }
+      }
+
+      function validateFilters (from, to) {
+        if (!from && !to) {
+          window.alert(i18n[language].atLeastOne)
+          return false
+        }
+        if (from && !emailRegex.test(from)) {
+          window.alert(i18n[language].fromInvalid)
+          return false
+        }
+        if (to && !emailRegex.test(to)) {
+          window.alert(i18n[language].toInvalid)
+          return false
+        }
+        return true
+      }
+
+      langEsBtn.addEventListener('click', function () { applyLanguage('es') })
+      langEnBtn.addEventListener('click', function () { applyLanguage('en') })
+
+      filtersForm.addEventListener('submit', function (event) {
+        const submitter = event.submitter
+        if (submitter && submitter.name === 'mode' && submitter.value === 'all') return
+        const filters = getFilters()
+        if (!validateFilters(filters.from, filters.to)) event.preventDefault()
+      })
+
+      applyLanguage(language === 'en' ? 'en' : 'es')
+    })()
+  </script>
 </body>
 </html>

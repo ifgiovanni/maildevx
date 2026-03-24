@@ -7,11 +7,11 @@
         ng-click="toggleDropdown($event, 'display')"
         ng-class="{ open: dropdownOpen == 'display' }"
       >
-        <span ng-if="!panelVisibility || panelVisibility === 'html'"><i class="fas fa-file-code"></i> HTML</span>
-        <span ng-if="panelVisibility === 'plain'"><i class="fas fa-file-alt"></i> Text</span>
-        <span ng-if="panelVisibility === 'attachments'"><i class="fas fa-paperclip"></i> Attachments</span>
-        <span ng-if="panelVisibility === 'headers'"><i class="fas fa-th-list"></i> Headers</span>
-        <span ng-if="panelVisibility === 'source'"><i class="fas fa-code"></i> Source</span>
+        <span ng-if="!panelVisibility || panelVisibility === 'html'"><i class="fas fa-file-code"></i> {{ t('html') }}</span>
+        <span ng-if="panelVisibility === 'plain'"><i class="fas fa-file-alt"></i> {{ t('text') }}</span>
+        <span ng-if="panelVisibility === 'attachments'"><i class="fas fa-paperclip"></i> {{ t('attachments') }}</span>
+        <span ng-if="panelVisibility === 'headers'"><i class="fas fa-th-list"></i> {{ t('headers') }}</span>
+        <span ng-if="panelVisibility === 'source'"><i class="fas fa-code"></i> {{ t('source') }}</span>
       </a>
       <ul class="dropdown-menu">
         <li>
@@ -20,7 +20,7 @@
               ng-class="{ active: panelVisibility == 'html', disabled: !item.html }">
                 <span>
                   <i class="fas fa-file-code"></i>
-                  HTML
+                  {{ t('html') }}
                 </span>
             </a>
         </li>
@@ -30,7 +30,7 @@
               ng-class="{ active: panelVisibility == 'plain', disabled: !item.text  }">
                 <span>
                   <i class="fas fa-file-alt"></i>
-                  Text
+                  {{ t('text') }}
                 </span>
             </a>
         </li>
@@ -40,7 +40,7 @@
               ng-class="{ active: panelVisibility == 'attachments', disabled: !item.attachments }">
                 <span>
                   <i class="fas fa-paperclip"></i>
-                  Attachments
+                  {{ t('attachments') }}
                 </span>
             </a>
         </li>
@@ -50,7 +50,7 @@
               ng-class="{ active: panelVisibility == 'headers' }">
                 <span>
                   <i class="fas fa-th-list"></i>
-                  Headers
+                  {{ t('headers') }}
                 </span>
             </a>
         </li>
@@ -60,7 +60,7 @@
               ng-class="{ active: panelVisibility == 'source' }">
                 <span>
                   <i class="fas fa-code"></i>
-                  Source ({{item.sizeHuman}})
+                  {{ t('source') }} ({{item.sizeHuman}})
                 </span>
             </a>
         </li>
@@ -164,7 +164,7 @@
         <a href="email/{{item.id}}/download" class="">
           <span>
             <i class="fas fa-cloud-download-alt"></i>
-            Download
+            {{ t('download') }}
           </span>
         </a>
     </li>
@@ -179,7 +179,7 @@
       >
         <span>
           <i class="fas fa-paper-plane"></i>
-          Relay
+          {{ t('relay') }}
         </span>
       </a>
       <ul class="dropdown-menu">
@@ -189,7 +189,7 @@
             ng-class="{ disabled: !config.isOutgoingEnabled }">
               <span>
                 <i class="fas fa-paper-plane"></i>
-                Relay
+                {{ t('relay') }}
               </span>
           </a>
         </li>
@@ -199,7 +199,7 @@
             ng-class="{ disabled: !config.isOutgoingEnabled }">
               <span>
                 <i class="fas fa-paper-plane"></i>
-                Relay to...
+                {{ t('relayTo') }}
               </span>
           </a>
         </li>
@@ -214,7 +214,7 @@
       >
         <span>
           <i class="fas fa-trash-alt"></i>
-          Delete
+          {{ t('delete') }}
         </span>
       </a>
     </li>
@@ -226,28 +226,51 @@
 <div class="email-meta">
   <div class="subject">{{item.subject}}</div>
   <div class="row from">
-    <div class="description">From:</div>
+    <div class="description">{{ t('fromLabel') }}:</div>
     <div class="description-value">
       <app-address ng-repeat="a in item.from" address="a"></app-address>
     </div>
   </div>
   <div class="row to">
-    <div class="description">To:</div>
+    <div class="description">{{ t('toLabel') }}:</div>
     <div class="description-value">
       <app-address ng-repeat="a in item.to" address="a"></app-address>
     </div>
   </div>
   <div ng-if="item.cc.length" class="row cc">
-    <div class="description">Cc:</div>
+    <div class="description">{{ t('cc') }}:</div>
     <div class="description-value">
       <app-address ng-repeat="a in item.cc" address="a"></app-address>
     </div>
   </div>
   <div ng-if="item.calculatedBcc.length" class="row calculated-bcc">
-    <div class="description">Bcc:</div>
+    <div class="description">{{ t('bcc') }}:</div>
     <div class="description-value">
       <app-address ng-repeat="a in item.calculatedBcc" address="a"></app-address>
     </div>
+  </div>
+</div>
+
+<div class="quick-attachments-section" ng-if="item.attachments && item.attachments.length">
+  <div class="quick-attachments-header">
+    <span class="quick-attachments-title">
+      <i class="fas fa-paperclip"></i>
+      {{ t('attachments') }} ({{item.attachments.length}})
+    </span>
+  </div>
+
+  <div class="quick-attachments-grid">
+    <article class="quick-attachment-card" ng-repeat="attachment in item.attachments">
+      <header class="quick-attachment-card-header">
+        <strong class="quick-attachment-name">{{attachment.fileName || attachment.generatedFileName}}</strong>
+        <a
+          target="_blank"
+          ng-href="{{ getAttachmentUrl(attachment) }}"
+          class="quick-attachment-open-link">
+          {{ t('open') }}
+        </a>
+      </header>
+    </article>
   </div>
 </div>
 
@@ -271,12 +294,44 @@
 
     <div class="email-content-view email-content-view-attachments" ng-hide="panelVisibility != 'attachments'">
       <div class="panel-attachments" >
-          <span ng-repeat="attachment in item.attachments">
-              <a target="_blank" ng-href="email/{{item.id}}/attachment/{{attachment.generatedFileName | encodeURIComponent}}">
-                  <strong>{{attachment.generatedFileName}}</strong>
-              </a>
-              <br>
-          </span>
+          <div class="attachments-grid" ng-if="item.attachments && item.attachments.length">
+            <article class="attachment-card" ng-repeat="attachment in item.attachments">
+              <header class="attachment-card-header">
+                <strong class="attachment-name">{{attachment.fileName || attachment.generatedFileName}}</strong>
+                <a
+                  target="_blank"
+                  ng-href="{{ getAttachmentUrl(attachment) }}"
+                  class="attachment-open-link">
+                  {{ t('open') }}
+                </a>
+              </header>
+
+              <div class="attachment-preview" ng-if="isImageAttachment(attachment)">
+                <img
+                  ng-src="{{ getAttachmentUrl(attachment) }}"
+                  alt="{{attachment.fileName || attachment.generatedFileName}}"
+                  class="attachment-image-preview"
+                >
+              </div>
+
+              <div class="attachment-preview attachment-preview-pdf" ng-if="!isImageAttachment(attachment) && isPdfAttachment(attachment)">
+                <iframe
+                  ng-src="{{ getAttachmentUrl(attachment) }}"
+                  title="{{attachment.fileName || attachment.generatedFileName}}"
+                  class="attachment-pdf-preview">
+                </iframe>
+              </div>
+
+              <div class="attachment-fallback" ng-if="!isImageAttachment(attachment) && !isPdfAttachment(attachment)">
+                <i class="fas fa-file"></i>
+                <span>{{ t('noPreview') }}</span>
+              </div>
+            </article>
+          </div>
+
+          <div class="attachments-empty" ng-if="!item.attachments || !item.attachments.length">
+            {{ t('noAttachments') }}
+          </div>
       </div>
     </div>
 

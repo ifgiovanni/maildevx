@@ -1,7 +1,7 @@
 {
   "name": "maildev",
   "description": "SMTP Server and Web Interface for reading and testing emails during development",
-  "version": "2.2.1",
+  "version": "3.0.0",
   "keywords": [
     "email",
     "e-mail",
@@ -12,17 +12,17 @@
     "development",
     "smtp"
   ],
-  "author": "Dan Farrelly",
-  "homepage": "http://maildev.github.io/maildev/",
+  "author": "Giovanni Orellana",
+  "homepage": "https://github.com/ifgiovanni/maildev",
   "maintainers": [
     {
-      "name": "Dan Farrelly",
-      "email": "daniel.j.farrelly@gmail.com"
+      "name": "Giovanni Orellana",
+      "email": "contact@ifgiovanni.com"
     }
   ],
   "repository": {
     "type": "git",
-    "url": "http://github.com/maildev/maildev.git"
+    "url": "https://github.com/ifgiovanni/maildev"
   },
   "scripts": {
     "start": "node ./bin/maildev",

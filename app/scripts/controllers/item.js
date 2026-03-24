@@ -21,6 +21,10 @@ app.controller('ItemCtrl', [
     $http,
     $cookies
   ) {
+    function tr (key, es, en) {
+      if (typeof $scope.t === 'function') return $scope.t(key)
+      return ($scope.language === 'en' ? en : es)
+    }
     // Get the item data by route parameter
     const getItem = function () {
       Email.get(
@@ -166,7 +170,7 @@ app.controller('ItemCtrl', [
           $scope.relay(item, relayTo)
           $cookies.relayTo = relayTo
         } else {
-          window.alert('The specified email address is not correct.')
+          window.alert(tr('invalidEmail', 'El correo especificado no es valido.', 'The specified email address is not correct.'))
         }
       }
     }
@@ -175,22 +179,29 @@ app.controller('ItemCtrl', [
     $scope.relay = function (item, relayTo) {
       if (!$rootScope.config.isOutgoingEnabled) {
         window.alert(
-          'Relay feature has not been configured.\n' +
-            'Run maildev --help for configuration info.'
+          tr(
+            'relayNotConfigured',
+            'La funcion de reenvio no esta configurada.\nEjecuta maildev --help para mas informacion.',
+            'Relay feature has not been configured.\nRun maildev --help for configuration info.'
+          )
         )
         return
       }
 
       if (
         window.confirm(
-          'Are you sure you want to REALLY SEND email to ' +
+          tr(
+            'relayConfirm',
+            'Seguro que deseas reenviar el correo a ',
+            'Are you sure you want to REALLY SEND email to '
+          ) +
             (relayTo ||
               item.to
                 .map(function (to) {
                   return to.address
                 })
                 .join()) +
-            ' through ' +
+            tr('throughHost', ' a traves de ', ' through ') +
             $rootScope.config.outgoingHost +
             '?'
         )
@@ -201,12 +212,50 @@ app.controller('ItemCtrl', [
         })
           .success(function (data, status) {
             console.log('Relay result: ', data, status)
-            window.alert('Relay successful')
+            window.alert(tr('relaySuccess', 'Reenvio exitoso.', 'Relay successful'))
           })
           .error(function (data) {
-            window.alert('Relay failed: ' + data.error)
+            window.alert(tr('relayFailed', 'Reenvio fallido: ', 'Relay failed: ') + data.error)
           })
       }
+    }
+
+    function getAttachmentName (attachment) {
+      return (
+        attachment.generatedFileName ||
+        attachment.fileName ||
+        attachment.filename ||
+        ''
+      )
+    }
+
+    function getAttachmentType (attachment) {
+      return (attachment.contentType || attachment.mimeType || '').toLowerCase()
+    }
+
+    $scope.getAttachmentUrl = function (attachment) {
+      if (!$scope.item || !$scope.item.id || !attachment) return ''
+      return (
+        'email/' +
+        $scope.item.id +
+        '/attachment/' +
+        window.encodeURIComponent(getAttachmentName(attachment))
+      )
+    }
+
+    $scope.isImageAttachment = function (attachment) {
+      const contentType = getAttachmentType(attachment)
+      const name = getAttachmentName(attachment).toLowerCase()
+      return (
+        contentType.indexOf('image/') === 0 ||
+        /\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(name)
+      )
+    }
+
+    $scope.isPdfAttachment = function (attachment) {
+      const contentType = getAttachmentType(attachment)
+      const name = getAttachmentName(attachment).toLowerCase()
+      return contentType === 'application/pdf' || /\.pdf$/i.test(name)
     }
 
     // Initialize the view by getting the email

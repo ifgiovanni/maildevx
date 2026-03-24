@@ -3,13 +3,1049 @@
     <head>
         <meta charset="utf-8"/>
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
-        <title>MailDev{{ unreadItems > 0 ? ' (+' + unreadItems + ')' : '' }}</title>
+        <title>InboxLab{{ unreadItems > 0 ? ' (+' + unreadItems + ')' : '' }}</title>
         <meta name="description" content="SMTP Server + Web Interface for viewing and testing emails during development.">
         <meta name="viewport" content="width=device-width">
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-        <script src="https://cdn.tailwindcss.com"></script>
         <link rel="stylesheet" href="styles/style.css">
+        <style>
+            :root {
+                --gmail-bg: #f5f5f7;
+                --gmail-surface: #ffffff;
+                --gmail-border: #e7e8ec;
+                --gmail-text: #111217;
+                --gmail-muted: #71737b;
+                --gmail-blue: #181b25;
+                --gmail-blue-soft: #f1f3f7;
+            }
+
+            body {
+                background: var(--gmail-bg);
+                color: var(--gmail-text);
+            }
+
+            .application-container {
+                padding: 0.65em;
+                gap: 0.65em;
+                background: var(--gmail-bg);
+            }
+
+            .sidebar {
+                flex: 0 0 25.5%;
+                max-width: 29em;
+                min-width: 22em;
+                border: 1px solid var(--gmail-border);
+                border-radius: 0.85em;
+                overflow: hidden;
+                box-shadow: 0 2px 9px rgba(17, 18, 23, 0.06);
+            }
+
+            .main-container {
+                border: 1px solid var(--gmail-border);
+                border-radius: 0.85em;
+                overflow: hidden;
+                background: var(--gmail-surface);
+                box-shadow: 0 2px 9px rgba(17, 18, 23, 0.06);
+            }
+
+            .sidebar-header {
+                background: var(--gmail-surface);
+                border-right: 0;
+                border-bottom: 1px solid var(--gmail-border);
+            }
+
+            .brand-container {
+                height: 3.1em;
+                border-bottom: 0;
+                padding: 0.7em 0.9em 0;
+            }
+
+            .brand {
+                color: var(--gmail-text);
+                font-size: 19px;
+                font-weight: 700;
+            }
+
+            .brand-unread {
+                color: var(--gmail-muted);
+                font-weight: 500;
+            }
+
+            .header-nav {
+                top: 0.2em;
+                right: 0.5em;
+            }
+
+            .header-nav-item-link {
+                width: 2.3em;
+                border-radius: 999px;
+                color: var(--gmail-muted);
+            }
+
+            .header-nav-item-link.lang-switch {
+                width: 3.1em;
+                gap: 0.25em;
+            }
+
+            .lang-badge {
+                font-size: 10px;
+                font-weight: 700;
+                letter-spacing: 0.02em;
+            }
+
+            .header-nav-item-link:hover {
+                background: #f4f5f7;
+            }
+
+            .header-nav-more-menu.header-nav-more-menu {
+                top: 2.6em;
+                right: 0.4em;
+                border: 1px solid var(--gmail-border);
+                border-radius: 0.8em;
+                box-shadow: 0 4px 18px rgba(0, 0, 0, 0.12);
+            }
+
+            .header-nav-select-row {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 0.75em;
+                padding: 0.55em 0.8em;
+                font-size: 12px;
+                color: #4a4f58;
+            }
+
+            .header-nav-select {
+                min-width: 5.4em;
+                border: 1px solid #d9dce4;
+                background: #fff;
+                border-radius: 0.45em;
+                padding: 0.25em 0.45em;
+                font-size: 12px;
+                color: #1f222b;
+            }
+
+            .sidebar-filter-chip {
+                display: inline-flex;
+                align-items: center;
+                gap: 0.45em;
+                margin: 0 0.9em 0.65em;
+                padding: 0.3em 0.6em;
+                border-radius: 999px;
+                background: var(--gmail-blue-soft);
+                color: #232531;
+                font-size: 12px;
+                max-width: calc(100% - 1.8em);
+            }
+
+            .chip-label {
+                opacity: 0.75;
+            }
+
+            .chip-value {
+                max-width: 16em;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                font-weight: 600;
+            }
+
+            .chip-action {
+                border: 0;
+                border-radius: 999px;
+                width: 1.7em;
+                height: 1.7em;
+                background: transparent;
+                color: #232531;
+                cursor: pointer;
+            }
+
+            .chip-action:hover {
+                background: rgba(20, 24, 36, 0.08);
+            }
+
+            .sidebar-emails-container {
+                height: calc(100% - 3.1em);
+                border-right: 0;
+            }
+
+            .search-container {
+                height: 3.2em;
+                padding: 0.55em 0.8em;
+                border-bottom: 1px solid var(--gmail-border);
+                background: var(--gmail-surface);
+            }
+
+            .search-input {
+                border-radius: 999px;
+                border: 1px solid transparent;
+                background: #f1f2f5;
+                padding-left: 2.5em;
+                height: 100%;
+                transition: border-color 120ms, background-color 120ms, box-shadow 120ms;
+            }
+
+            .search-input:focus {
+                background: #fff;
+                border-color: #dde0e7;
+                box-shadow: 0 1px 2px rgba(29, 31, 39, 0.1);
+            }
+
+            .search-icon {
+                top: 1.15em;
+                left: 1.6em;
+                color: #5f6368;
+                margin-top: 0.6em;
+                margin-left: 0.2em;
+            }
+
+            .sidebar-scrollable-content {
+                height: calc(100% - 3.2em);
+                border-top: 0;
+                overflow-y: auto;
+                overflow-x: hidden;
+            }
+
+            .email-item-link {
+                padding: 0;
+                border-top: 1px solid #edf1f6;
+                background: #fff;
+            }
+
+            .email-row {
+                display: flex;
+                align-items: center;
+                gap: 0.75em;
+                min-height: 2.75em;
+                padding: 0 0.95em;
+            }
+
+            .sender {
+                width: 11.5em;
+                flex-shrink: 0;
+                font-size: 13px;
+                font-weight: 500;
+                color: #202124;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .subject-line {
+                min-width: 0;
+                flex: 1;
+                font-size: 13px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .subject-main {
+                color: #202124;
+            }
+
+            .snippet {
+                color: #5f6368;
+            }
+
+            .attachment-icon {
+                color: #5f6368;
+                font-size: 12px;
+            }
+
+            .email-item .subline {
+                color: #5f6368;
+                font-size: 12px;
+                flex-shrink: 0;
+                min-width: 3.4em;
+                text-align: right;
+            }
+
+            .email-item.unread .email-item-link {
+                background: #fafafa;
+                border-top-color: #dbe7ff;
+                box-shadow: inset 3px 0 0 #cccccc;
+            }
+
+            .email-item.unread .sender,
+            .email-item.unread .subject-main {
+                font-weight: 800;
+                color: #1b2558;
+            }
+
+            .email-item.unread .snippet {
+                color: #4d5a8d;
+            }
+
+            .email-item.current .email-item-link {
+                background: #f3f4f7;
+            }
+
+            .email-item.current .sender,
+            .email-item.current .subject-main,
+            .email-item.current .snippet,
+            .email-item.current .subline {
+                color: #232531;
+            }
+
+            .email-item-link:hover {
+                background: #f7f9fc;
+            }
+
+            .email-toolbar {
+                height: 3em;
+                padding: 0 0.6em;
+                background: var(--gmail-surface);
+                border-bottom: 1px solid var(--gmail-border);
+                justify-content: flex-start;
+            }
+
+            .email-toolbar li a {
+                border-radius: 999px;
+                padding: 0 0.85em 0 0.55em;
+            }
+
+            .email-toolbar li a,
+            .email-toolbar li a:visited {
+                color: #3c4043;
+            }
+
+            .email-toolbar li a:hover {
+                background: #f1f3f4;
+            }
+
+            .email-toolbar li a span i {
+                font-size: 14px;
+            }
+
+            .email-content {
+                height: calc(100vh - 3em);
+            }
+
+            .email-meta {
+                background: #fff;
+                border-bottom: 1px solid var(--gmail-border);
+            }
+
+            .email-meta .subject {
+                font-size: 20px;
+                font-weight: 500;
+                letter-spacing: -0.01em;
+                color: #202124;
+            }
+
+            .email-meta .description {
+                color: #5f6368;
+                font-weight: 500;
+            }
+
+            .email-content-view-html {
+                background: #f5f7fb;
+            }
+
+            .preview-iframe {
+                background: #fff;
+            }
+
+            .inbox-empty-wrap {
+                min-height: 100%;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: flex-start;
+                padding: 1.25em 1em;
+                background: #fff;
+                margin-top: 5em;
+            }
+
+            .analytics-header {
+                width: min(48em, 100%);
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                margin-bottom: 0.8em;
+            }
+
+            .analytics-kicker {
+                margin: 0 0 0.12em;
+                color: #7b8090;
+                font-size: 0.74em;
+                text-transform: uppercase;
+                letter-spacing: 0.1em;
+                font-weight: 700;
+            }
+
+            .analytics-title {
+                margin: 0;
+                color: #1d2230;
+                font-size: 1.28em;
+                letter-spacing: -0.02em;
+            }
+
+            .analytics-action {
+                border: 1px solid #1f2433;
+                background: #1f2433;
+                color: #fff;
+                border-radius: 0.58em;
+                padding: 0.5em 0.82em;
+                font-size: 12px;
+                font-weight: 600;
+                cursor: pointer;
+            }
+
+            .inbox-filter-banner {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                width: min(48em, 100%);
+                gap: 0.8em;
+                border: 1px solid #d9e0f3;
+                border-radius: 0.9em;
+                background: linear-gradient(180deg, #edf3ff 0%, #e8f0fe 100%);
+                color: #1f3f86;
+                padding: 0.72em 0.95em;
+                margin-bottom: 1em;
+                box-shadow: 0 6px 18px rgba(41, 91, 191, 0.1);
+            }
+
+            .kpi-grid {
+                width: min(48em, 100%);
+                display: grid;
+                grid-template-columns: repeat(4, minmax(0, 1fr));
+                gap: 0.7em;
+                margin-bottom: 0.9em;
+            }
+
+            .kpi-card {
+                border: 1px solid #e4e8f0;
+                border-radius: 0.85em;
+                background: #fff;
+                padding: 0.65em 0.7em;
+            }
+
+            .kpi-label {
+                display: block;
+                color: #7a8090;
+                font-size: 11px;
+                text-transform: uppercase;
+                letter-spacing: 0.04em;
+            }
+
+            .kpi-value {
+                display: block;
+                margin-top: 0.22em;
+                color: #1d2230;
+                font-size: 1.22em;
+                letter-spacing: -0.02em;
+            }
+
+            .inbox-dashboard-grid {
+                width: min(48em, 100%);
+                display: grid;
+                grid-template-columns: 0.9fr 1.3fr;
+                gap: 0.9em;
+                margin-bottom: 1em;
+            }
+
+            .inbox-dashboard-card {
+                border: 1px solid #e4e8f0;
+                border-radius: 1.05em;
+                background: #fff;
+                padding: 1.05em 1.1em;
+                box-shadow: 0 8px 24px rgba(18, 22, 34, 0.06);
+            }
+
+            .inbox-dashboard-title {
+                margin: 0 0 0.8em;
+                font-size: 1.02em;
+                letter-spacing: -0.01em;
+                color: #1d2230;
+            }
+
+            .inbox-filter-action {
+                border: 0;
+                border-radius: 999px;
+                background: #d7e6ff;
+                color: #1f4ea0;
+                padding: 0.35em 0.72em;
+                font-weight: 600;
+                cursor: pointer;
+            }
+
+            .inbox-share-wrap {
+                width: 100%;
+            }
+
+            .inbox-share-row {
+                display: grid;
+                grid-template-columns: 1fr auto;
+                gap: 0.48em;
+            }
+
+            .inbox-share-input {
+                width: 100%;
+                border: 1px solid #d9dde6;
+                border-radius: 0.58em;
+                padding: 0.5em 0.62em;
+                background: #fbfcff;
+                color: #2a2d37;
+                font-size: 12px;
+            }
+
+            .inbox-share-btn {
+                border: 1px solid #d4d8e2;
+                background: #fff;
+                color: #232531;
+                border-radius: 0.58em;
+                padding: 0.5em 0.72em;
+                font-size: 12px;
+                font-weight: 600;
+                cursor: pointer;
+            }
+
+            .inbox-share-status {
+                margin: 0.58em 0 0;
+                color: #606573;
+                font-size: 11px;
+            }
+
+            .inbox-share-generate {
+                margin-top: 0.5em;
+                width: 100%;
+                border: 1px solid #232531;
+                background: #232531;
+                color: #fff;
+                border-radius: 0.58em;
+                padding: 0.5em 0.72em;
+                font-size: 12px;
+                font-weight: 600;
+                cursor: pointer;
+            }
+
+            .inbox-share-count {
+                margin: 0.62em 0 0;
+                color: #616471;
+                font-size: 12px;
+            }
+
+            .inbox-empty-card {
+                width: min(48em, 100%);
+                border: 1px solid #e4e8f0;
+                border-radius: 1.05em;
+                padding: 1.2em;
+                background: #fff;
+                box-shadow: 0 8px 24px rgba(18, 22, 34, 0.05);
+            }
+
+            .inbox-empty-icon {
+                width: 3.4em;
+                height: 3.4em;
+                border-radius: 50%;
+                margin: 0 auto 0.85em;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: #eef3fc;
+                color: var(--gmail-blue);
+                font-size: 1.45em;
+            }
+
+            .inbox-empty-title {
+                margin: 0;
+                font-size: 1.45em;
+                letter-spacing: -0.01em;
+            }
+
+            .inbox-empty-description {
+                margin: 0.7em auto 1.25em;
+                max-width: 38em;
+                color: #5f6368;
+                line-height: 1.5;
+            }
+
+            .inbox-metrics-grid {
+                display: grid;
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                gap: 0.6em;
+                margin: 0.7em 0 0.25em;
+                max-width: none;
+            }
+
+            .inbox-metric-card {
+                border: 1px solid #e7eaf0;
+                border-radius: 0.65em;
+                background: linear-gradient(180deg, #fcfdff 0%, #f7f9fc 100%);
+                padding: 0.48em 0.35em;
+                text-align: center;
+            }
+
+            .inbox-metric-label {
+                display: block;
+                color: #7a7f89;
+                font-size: 10px;
+                text-transform: uppercase;
+                letter-spacing: 0.03em;
+            }
+
+            .inbox-metric-value {
+                display: block;
+                margin-top: 0.08em;
+                font-size: 15px;
+                color: #1d2230;
+            }
+
+            .inbox-metric-hero {
+                margin: 0.22em 0;
+                color: #4a4f5d;
+                font-size: 1.02em;
+                line-height: 1.42;
+            }
+
+            .inbox-metric-hero strong {
+                color: #1d2230;
+            }
+
+            .inbox-hero-number {
+                display: inline-block;
+                min-width: 2.2em;
+                text-align: center;
+                margin-right: 0.12em;
+                font-size: 1.22em;
+                letter-spacing: -0.01em;
+            }
+
+            .smtp-title {
+                margin: 0 0 0.75em;
+                font-size: 1em;
+                color: #1d2230;
+                letter-spacing: -0.01em;
+            }
+
+            .smtp-config-list {
+                margin: 0;
+                padding: 0;
+                list-style: none;
+                max-width: none;
+                border: 1px solid var(--gmail-border);
+                border-radius: 0.85em;
+                overflow: hidden;
+            }
+
+            .smtp-config-list li {
+                display: flex;
+                justify-content: space-between;
+                gap: 1em;
+                padding: 0.7em 0.9em;
+                border-top: 1px solid #edf1f5;
+            }
+
+            .smtp-config-list li:first-child {
+                border-top: 0;
+            }
+
+            .smtp-config-list span {
+                color: #5f6368;
+            }
+
+            .attachments-grid {
+                display: grid;
+                gap: 0.9em;
+                grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            }
+
+            .attachment-card {
+                border: 1px solid var(--gmail-border);
+                border-radius: 0.8em;
+                background: #fff;
+                overflow: hidden;
+            }
+
+            .attachment-card-header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 0.8em;
+                border-bottom: 1px solid #edf1f5;
+                padding: 0.6em 0.75em;
+            }
+
+            .attachment-name {
+                font-size: 12px;
+                color: #3c4043;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .attachment-open-link {
+                font-size: 12px;
+                font-weight: 600;
+                color: var(--gmail-blue);
+                text-decoration: none;
+            }
+
+            .attachment-open-link:hover {
+                text-decoration: underline;
+            }
+
+            .attachment-preview {
+                background: #f8fafc;
+                padding: 0.6em;
+            }
+
+            .attachment-image-preview {
+                display: block;
+                max-width: 100%;
+                width: 100%;
+                height: auto;
+                border-radius: 0.45em;
+                border: 1px solid #e5eaf1;
+                background: #fff;
+            }
+
+            .attachment-preview-pdf {
+                padding: 0;
+            }
+
+            .attachment-pdf-preview {
+                display: block;
+                width: 100%;
+                height: 320px;
+                border: 0;
+                background: #fff;
+            }
+
+            .attachment-fallback {
+                display: flex;
+                align-items: center;
+                gap: 0.55em;
+                color: #5f6368;
+                padding: 0.85em 0.75em;
+                font-size: 12px;
+            }
+
+            .attachments-empty {
+                color: #5f6368;
+                font-size: 13px;
+                padding: 0.35em 0.1em;
+            }
+
+            .quick-attachments-section {
+                border-bottom: 1px solid var(--gmail-border);
+                background: #fff;
+                padding: 0.7em 0.9em 0.9em;
+            }
+
+            .quick-attachments-header {
+                margin-bottom: 0.55em;
+            }
+
+            .quick-attachments-title {
+                display: inline-flex;
+                align-items: center;
+                gap: 0.45em;
+                color: #3c4043;
+                font-size: 13px;
+                font-weight: 600;
+            }
+
+            .quick-attachments-grid {
+                display: grid;
+                gap: 0.75em;
+                grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            }
+
+            .quick-attachment-card {
+                border: 1px solid var(--gmail-border);
+                border-radius: 0.75em;
+                background: #fff;
+                overflow: hidden;
+            }
+
+            .quick-attachment-card-header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 0.7em;
+                border-bottom: 1px solid #edf1f5;
+                padding: 0.48em 0.62em;
+            }
+
+            .quick-attachment-name {
+                font-size: 12px;
+                color: #3c4043;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .quick-attachment-open-link {
+                font-size: 12px;
+                font-weight: 600;
+                color: var(--gmail-blue);
+                text-decoration: none;
+            }
+
+            .quick-attachment-open-link:hover {
+                text-decoration: underline;
+            }
+
+            /* Neo mail client layout */
+            :root {
+                --neo-bg: #f3f3f5;
+                --neo-card: #ffffff;
+                --neo-border: #e5e7ec;
+                --neo-text: #181a20;
+                --neo-muted: #7a7f89;
+            }
+
+            body {
+                background: var(--neo-bg);
+                color: var(--neo-text);
+            }
+
+            .application-container {
+                padding: 0.45em;
+                gap: 0.45em;
+                height: 100vh;
+                display: flex;
+                box-sizing: border-box;
+            }
+
+            .sidebar {
+                flex: 0 0 31%;
+                max-width: 25em;
+                min-width: 20em;
+                border-radius: 0.8em;
+                height: calc(100vh - 0.9em);
+                display: flex;
+                flex-direction: column;
+                min-height: 0;
+            }
+
+            .main-container {
+                border-radius: 0.8em;
+                min-height: 0;
+            }
+
+            .sidebar-header {
+                flex: 0 0 auto;
+            }
+
+            .brand-container {
+                height: 3em;
+                border-bottom: 1px solid var(--neo-border);
+            }
+
+            .brand {
+                font-size: 20px;
+                font-weight: 700;
+                letter-spacing: -0.02em;
+            }
+
+            .sidebar-filter-chip {
+                margin-top: 0.45em;
+            }
+
+            .search-container {
+                border-bottom: 0;
+            }
+
+            .mail-metrics {
+                display: grid;
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                gap: 0.4em;
+                padding: 0 0.8em 0.5em;
+                background: #fff;
+            }
+
+            .metric-card {
+                border: 1px solid #e4e6ec;
+                border-radius: 0.5em;
+                background: #fafbfc;
+                padding: 0.35em 0.5em;
+                text-align: center;
+            }
+
+            .metric-label {
+                display: block;
+                color: #7a7f89;
+                font-size: 10px;
+                text-transform: uppercase;
+                letter-spacing: 0.03em;
+            }
+
+            .metric-value {
+                display: block;
+                margin-top: 0.08em;
+                font-size: 13px;
+                color: #1f222b;
+            }
+
+            .list-filters {
+                min-height: 2.2em;
+                display: flex;
+                align-items: center;
+                gap: 0.45em;
+                padding: 0 0.8em 0.55em;
+                border-bottom: 1px solid var(--neo-border);
+                background: #fff;
+            }
+
+            .page-size-inline {
+                margin-left: auto;
+                display: inline-flex;
+                align-items: center;
+                gap: 0.45em;
+                font-size: 11px;
+                color: #7a7f89;
+            }
+
+            .page-size-select {
+                appearance: none;
+                border: 1px solid #d9dce4;
+                background: #fff;
+                color: #1f222b;
+                border-radius: 0.42em;
+                padding: 0.2em 0.45em;
+                font-size: 11px;
+                cursor: pointer;
+            }
+
+            .list-filter {
+                appearance: none;
+                background: transparent;
+                font-size: 12px;
+                border: 1px solid #d9dce4;
+                color: #676b76;
+                padding: 0.25em 0.65em;
+                border-radius: 0.42em;
+                cursor: pointer;
+            }
+
+            .list-filter.active {
+                background: #f3f4f7;
+                color: #1f222b;
+                font-weight: 600;
+            }
+
+            .sidebar-scrollable-content {
+                height: auto;
+                overflow-y: auto;
+                overflow-x: hidden;
+                flex: 1 1 auto;
+                min-height: 0;
+            }
+
+            .sidebar-emails-container {
+                flex: 1 1 auto;
+                min-height: 0;
+                display: flex;
+                flex-direction: column;
+                height: auto;
+            }
+
+            .email-item-link {
+                padding: 0;
+                border-top: 1px solid #eceef2;
+                background: #fff;
+            }
+
+            .email-list .email-item:last-child .email-item-link {
+                border-bottom: 1px solid #eceef2;
+            }
+
+            .email-row {
+                display: block;
+                padding: 0.65em 0.85em 0.75em;
+            }
+
+            .email-row-top,
+            .mail-meta-row {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 0.5em;
+            }
+
+            .sender {
+                width: auto;
+                max-width: 80%;
+                font-size: 13px;
+            }
+
+            .subject-main {
+                display: block;
+                margin-top: 0.24em;
+                font-size: 13px;
+                font-weight: 600;
+                color: #1f222b;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .snippet {
+                display: block;
+                margin-top: 0.18em;
+                color: #7a7f89;
+                font-size: 11px;
+                line-height: 1.35;
+                max-height: 2.7em;
+                overflow: hidden;
+            }
+
+            .mail-meta-row {
+                margin-top: 0.34em;
+                font-size: 11px;
+                color: #7d818b;
+            }
+
+            .mail-target {
+                display: inline-flex;
+                gap: 0.35em;
+                align-items: center;
+                max-width: 85%;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .email-item.current .email-item-link {
+                background: #f4f5f8;
+            }
+
+            .email-toolbar {
+                background: #fff;
+                border-bottom: 1px solid var(--neo-border);
+            }
+
+            .email-meta {
+                border-bottom: 1px solid var(--neo-border);
+            }
+
+            @media (max-width: 1100px) {
+                .application-container {
+                    gap: 0.5em;
+                    padding: 0.5em;
+                }
+
+                .sidebar {
+                    min-width: 18em;
+                }
+
+                .sender {
+                    width: 8em;
+                }
+
+                .inbox-dashboard-grid {
+                    grid-template-columns: 1fr;
+                }
+
+                .kpi-grid {
+                    grid-template-columns: repeat(2, minmax(0, 1fr));
+                }
+            }
+        </style>
         <link rel="icon" id="favicon" />
     </head>
     <body ng-class="{'dark-theme': settings.darkThemeEnabled}">
@@ -19,8 +1055,7 @@
                 <div class="sidebar-header">
                     <div class="brand-container">
                         <a class="brand ng-cloak" href="#/">
-                            <i class="fas fa-envelope"></i>
-                            <span class="brand-text">MailDev</span>
+                            <span class="brand-text">{{ t('inbox') }}</span>
                         </a>
                         <span class="brand-unread ng-cloak" title="Total emails count (+ unread emails count)" ng-if="items && items.length" ng-click="toggleHeaderCountsUnread()">
                             {{items.length}} {{ unreadItems > 0 ? ' (+' + unreadItems + ')' : '' }}
@@ -30,25 +1065,32 @@
                     <div class="header-nav  ng-cloak" >
                         <ul class="header-nav-list">
                             <li class="header-nav-item">
-                                <a ng-click="refreshList()" href="" class="header-nav-item-link" title="Refresh emails">
+                                <a ng-click="refreshList()" href="" class="header-nav-item-link" title="{{ t('refreshEmails') }}">
                                     <i class="fas fa-sync"></i>
                                 </a>
                             </li>
                             <li class="header-nav-item">
-                                <a ng-click="markReadAll()" href="" class="header-nav-item-link" title="Mark all emails as read">
+                                <a ng-click="markReadAll()" href="" class="header-nav-item-link" title="{{ t('markAllRead') }}">
                                     <i class="fas fa-check-double"></i>
                                 </a>
                             </li>
+                            <!--
                             <li class="header-nav-item">
-                                <a ng-click="toggleDarkTheme()" href="" class="header-nav-item-link" title="Toggle between light and dark theme">
+                                <a ng-click="toggleDarkTheme()" href="" class="header-nav-item-link" title="{{ t('toggleTheme') }}">
 
                                     <i ng-if="settings.darkThemeEnabled" class="fas fa-sun"></i>
                                     <i ng-if="!settings.darkThemeEnabled" class="fas fa-moon"></i>
                                 </a>
                             </li>
+                            -->
                             <li class="header-nav-item">
-                                <a ng-click="toggleNavMore($event)" href="" class="header-nav-item-link" title="Additional configuration">
+                                <a ng-click="toggleNavMore($event)" href="" class="header-nav-item-link" title="{{ t('additionalConfig') }}">
                                     <i class="fas fa-cog"></i>
+                                </a>
+                            </li>
+                            <li class="header-nav-item">
+                                <a ng-click="toggleLanguage()" href="" class="header-nav-item-link lang-switch" title="{{ language === 'es' ? 'Cambiar idioma' : 'Switch language' }}">
+                                    <span class="lang-badge">{{ language.toUpperCase() }}</span>
                                 </a>
                             </li>
                         </ul>
@@ -68,7 +1110,7 @@
                                             ng-disabled="!notificationsSupported"
                                             ng-checked="settings.notificationsEnabled"
                                             ng-click="toggleNotifications()"/>
-                                            Browser notifications
+                                            {{ t('browserNotifications') }}
                                     </label>
                                 </li>
                                 <li>
@@ -81,17 +1123,32 @@
                                             id="toggle-auto-show"
                                             ng-checked="settings.autoShowEnabled"
                                             ng-click="toggleAutoShow()"/>
-                                            Open new mail
+                                            {{ t('openNewMail') }}
                                     </label>
+                                </li>
+                                <li>
+                                    <div class="header-nav-select-row">
+                                        <span>{{ t('emailsPerLoad') }}</span>
+                                        <select
+                                            class="header-nav-select"
+                                            ng-model="settings.pageSize"
+                                            ng-options="size as size for size in pageSizeOptions"
+                                            ng-change="updatePageSize()">
+                                        </select>
+                                    </div>
                                 </li>
                             </ul>
                         </div>
 
                     </div>
-
-
-
-
+                    <div class="sidebar-filter-chip ng-cloak" ng-if="config && ((config.filterFrom && config.filterFrom !== 'all') || (config.filterTo && config.filterTo !== 'all'))">
+                        <span class="chip-label">{{ t('filter') }}</span>
+                        <span class="chip-value" ng-if="config.filterFrom && config.filterFrom !== 'all'">{{ t('fromLabel') }}: {{ config.filterFrom }}</span>
+                        <span class="chip-value" ng-if="config.filterTo && config.filterTo !== 'all'">{{ t('toLabel') }}: {{ config.filterTo }}</span>
+                        <button ng-click="clearFilter()" class="chip-action" title="{{ t('clearFilter') }}">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
                 </div>
 
 
@@ -99,34 +1156,77 @@
 
                 <div class="sidebar-emails-container ">
                     <div class="search-container ng-cloak">
-                        <input type="text" ng-model="search" class="search-input" placeholder="Search...">
+                        <input type="text" ng-model="search" class="search-input" placeholder="{{ t('searchInMail') }}">
                         <i class="fas fa-search search-icon"></i>
+                    </div>
+                    <div class="mail-metrics ng-cloak">
+                        <div class="metric-card">
+                            <span class="metric-label">{{ t('total') }}</span>
+                            <strong class="metric-value">{{ metrics.total }}</strong>
+                        </div>
+                        <div class="metric-card">
+                            <span class="metric-label">{{ t('unreadMetric') }}</span>
+                            <strong class="metric-value">{{ metrics.unread }}</strong>
+                        </div>
+                        <div class="metric-card">
+                            <span class="metric-label">{{ t('readMetric') }}</span>
+                            <strong class="metric-value">{{ metrics.read }}</strong>
+                        </div>
+                    </div>
+                    <div class="list-filters">
+                        <button ng-click="setMailListFilter('all')" class="list-filter" ng-class="{ active: mailListFilter === 'all' }">{{ t('all') }}</button>
+                        <button ng-click="setMailListFilter('read')" class="list-filter" ng-class="{ active: mailListFilter === 'read' }">{{ t('read') }}</button>
+                        <button ng-click="setMailListFilter('unread')" class="list-filter" ng-class="{ active: mailListFilter === 'unread' }">{{ t('unread') }}</button>
+                        <label class="page-size-inline">
+                            <span>{{ t('emailsPerLoad') }}</span>
+                            <select
+                                class="page-size-select"
+                                ng-model="settings.pageSize"
+                                ng-options="size as size for size in pageSizeOptions"
+                                ng-change="updatePageSize()">
+                            </select>
+                        </label>
                     </div>
                     <div class="sidebar-scrollable-content ng-cloak">
 
                         <div ng-if="itemsLoading" class="emails-loading">
-                            Loading...
+                            {{ t('loading') }}
                         </div>
 
-                        <div ng-if="!itemsLoading && items && !items.length" class="emails-empty">
-                            No emails
+                        <div ng-if="!itemsLoading && !(items | filter: search | filter: filterByReadStatus).length" class="emails-empty">
+                            {{ t('noEmails') }}
                         </div>
 
                         <ul class="email-list">
-                            <li ng-repeat="item in items | orderBy:'time':!reverse | filter: search " class="email-item  email-{{item.id}} " ng-class="{current: item.id === currentItemId, read: item.read, unread: !item.read}">
+                            <li ng-repeat="item in items | orderBy:'time':!reverse | filter: search | filter: filterByReadStatus" class="email-item  email-{{item.id}} " ng-class="{current: item.id === currentItemId, read: item.read, unread: !item.read}">
                                 <a href="#/email/{{item.id}}" class="email-item-link">
-                                    <span class="title">
-                                        {{item.subject}}<span ng-hide="!item.attachments">&nbsp;<i class="fas fa-paperclip" ></i></span>
-                                        <span class="title-subline" title="{{item.to}}">
-                                            To:&nbsp;{{item.to.0.address}}&nbsp;<span ng-if="item.to.length > 1">+{{item.to.length-1}}</span>
+                                    <span class="email-row">
+                                        <span class="email-row-top">
+                                            <span class="sender" title="{{item.from.0.address}}">
+                                                {{item.from.0.name || item.from.0.address || t('noSender')}}
+                                            </span>
+                                            <span class="subline">{{item.time | date:'dd MMM'}}</span>
                                         </span>
-                                    </span>
-                                    <span class="subline">
-                                        {{item.time | date:'yyyy-MM-dd HH:mm:ss (Z)' }}
+                                        <span class="subject-main">{{item.subject || t('noSubject')}}</span>
+                                        <span class="snippet" title="{{item.to}}">
+                                            {{item.text || (t('toPrefix') + ' ' + item.to.0.address)}}
+                                        </span>
+                                        <span class="mail-meta-row">
+                                            <span class="mail-target">
+                                                <i class="fas fa-user-circle"></i>
+                                                {{item.to.0.address}}<span ng-if="item.to.length > 1"> +{{item.to.length-1}}</span>
+                                            </span>
+                                            <span ng-if="item.attachments" class="attachment-icon" title="Attachments">
+                                                <i class="fas fa-paperclip"></i>
+                                            </span>
+                                        </span>
                                     </span>
                                 </a>
                             </li>
                         </ul>
+                        <div ng-if="loadingMore" class="emails-loading">
+                            {{ t('loading') }}
+                        </div>
                     </div>
                 </div>
 

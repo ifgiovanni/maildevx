@@ -6,17 +6,20 @@
 
 app.service('Email', ['$resource', '$cookies', function ($resource, $cookies) {
 
-  // Obtener el filtro de email de los parámetros de URL  
-  const filterFrom = $cookies.filterFrom || '';  
-  return $resource('email/:id', {   
-    id: '',  
-    'from': filterFrom   
-  }, {  
-    update: {  
-      method: 'PUT',  
-      params: {}  
-    }  
-  });
+  const filterFrom = $cookies.filterFrom || ''
+  const filterTo = $cookies.filterTo || ''
+  const filterKey = $cookies.filterKey || ''
+  return $resource('email/:id', {
+    id: '',
+    u: filterKey,
+    from: filterFrom,
+    to: filterTo
+  }, {
+    update: {
+      method: 'PUT',
+      params: {}
+    }
+  })
 }]).service('Favicon', [function () {
   const favicon = document.getElementById('favicon')
   const canvas = document.createElement('canvas')

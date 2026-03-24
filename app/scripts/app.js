@@ -14,9 +14,19 @@ app.config(['$routeProvider', function ($routeProvider) {
 }])
 
 app.run(['$rootScope', function ($rootScope) {
+  const urlParams = new URLSearchParams(window.location.search)
+  const shareFilterKey = urlParams.get('u') || urlParams.get('key') || ''
+  const shareFilterFrom = urlParams.get('from') || ''
+  const shareFilterTo = urlParams.get('to') || ''
+
   // Connect Socket.io
   const socket = io({
-    path: location.pathname + 'socket.io'
+    path: location.pathname + 'socket.io',
+    query: {
+      u: shareFilterKey,
+      from: shareFilterFrom,
+      to: shareFilterTo
+    }
   })
 
   socket.on('newMail', function (data) {
